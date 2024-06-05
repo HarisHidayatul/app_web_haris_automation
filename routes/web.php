@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\kapal_controller;
+use App\Http\Controllers\telegramController;
 use Illuminate\Support\Facades\Route;
 use Spatie\FlareClient\View;
 
@@ -34,3 +35,7 @@ Route::get('/show-kapal',[kapal_controller::class, 'show_kapal']);
 Route::get('/show-kapal/{id}', [kapal_controller::class,'show_kapal_detail']);
 
 Route::get('/search-pekerjaan', [kapal_controller::class, 'search_pekerjaan']);
+
+
+Route::post('/telegram/webhook', [telegramController::class, 'webhook']);
+Route::post('/send-telegram-message', [telegramController::class, 'sendMessage']);
