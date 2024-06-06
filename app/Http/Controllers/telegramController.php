@@ -70,9 +70,12 @@ class telegramController extends Controller
             $status = session()->get('status_menu'.$chatId);
 
             if($message == '/1'){
-                $this->sendMessageToChat($chatId, "You said 1: $message");
+                $this->sendMessageToChat($chatId, "You said 1: $message $status");
             }else{
                 $this->sendMessageToChat($chatId, "You said: $message");
+
+                $status .= 'A';
+                session()->put('status_menu'.$chatId, $status);
             }
         }
 
