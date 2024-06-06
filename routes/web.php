@@ -37,5 +37,6 @@ Route::get('/show-kapal/{id}', [kapal_controller::class,'show_kapal_detail']);
 Route::get('/search-pekerjaan', [kapal_controller::class, 'search_pekerjaan']);
 
 
-Route::post('/telegram/webhook', [telegramController::class, 'webhook']);
-Route::get('/send-telegram-message', [telegramController::class, 'sendMessage']);
+Route::post('/telegram/webhook', [TelegramController::class, 'webhook'])->middleware('web');
+
+// Route::get('/send-telegram-message', [telegramController::class, 'sendMessage']);

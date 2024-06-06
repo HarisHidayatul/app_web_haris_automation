@@ -57,24 +57,31 @@ class telegramController extends Controller
     //     ]);
     // }
 
+    protected $telegram;
+
+    public function __construct()
+    {
+        $this->telegram = new Api(config('services.telegram.bot_token'));
+    }
+
     public function webhook(Request $request)
     {
-        $token = env('TELEGRAM_BOT_TOKEN');
         $update = json_decode(file_get_contents('php://input'), true);
 
         if (isset($update['message'])) {
             $message = $update['message']['text'];
             $chatId = $update['message']['chat']['id'];
-            
-            // Mendapatkan status interaksi pengguna dari sesi
-            $status = session()->get('status_menu'.$chatId);
 
-            if($message == '/1'){
+            // Mendapatkan status interaksi pengguna dari sesi
+            $status = session()->get('status_menu' . $chatId, '');
+
+            if ($message == '/1') {
                 $this->sendMessageToChat($chatId, "You said 1: $message $status");
-            }else{
-                $status = $status + 'A';
-                session()->put('status_menu'.$chatId, $status);
-                
+            } else {
+                // Update status dengan menambahkan 'A'
+                $status .= 'A';
+                session()->put('status_menu' . $chatId, $status);
+
                 $this->sendMessageToChat($chatId, "You said: $message");
             }
         }
@@ -82,36 +89,11 @@ class telegramController extends Controller
         return response('OK', 200);
     }
 
-    public function sendMessage(Request $request)
+    private function sendMessageToChat($chatId, $text)
     {
-        $token = env('TELEGRAM_BOT_TOKEN');
-        $chatId = $request->input('chat_id');
-        $message = $request->input('message');
-
-        $client = new Client();
-        $response = $client->post("https://api.telegram.org/bot{$token}/sendMessage", [
-            'json' => [
-                'chat_id' => $chatId,
-                'text' => $message,
-            ],
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'response' => json_decode($response->getBody()->getContents(), true),
-        ]);
-    }
-
-    private function sendMessageToChat($chatId, $message)
-    {
-        $token = env('TELEGRAM_BOT_TOKEN');
-
-        $client = new Client();
-        $client->post("https://api.telegram.org/bot{$token}/sendMessage", [
-            'json' => [
-                'chat_id' => $chatId,
-                'text' => $message,
-            ],
+        $this->telegram->sendMessage([
+            'chat_id' => $chatId,
+            'text' => $text,
         ]);
     }
 }
