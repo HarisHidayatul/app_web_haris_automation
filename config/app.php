@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\ServiceProvider;
+use Telegram\Bot\Laravel\Facades\Telegram;
+use Telegram\Bot\Laravel\TelegramServiceProvider;
 
 return [
 
@@ -168,6 +170,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        TelegramServiceProvider::class
     ])->toArray(),
 
     /*
@@ -183,6 +186,7 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // 'Example' => App\Facades\Example::class,
+        'Telegram' => Telegram::class
     ])->toArray(),
 
 ];
