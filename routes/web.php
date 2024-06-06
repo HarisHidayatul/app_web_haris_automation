@@ -38,4 +38,4 @@ Route::get('/search-pekerjaan', [kapal_controller::class, 'search_pekerjaan']);
 
 
 Route::post('/telegram/webhook', [telegramController::class, 'webhook']);
-Route::post('/send-telegram-message', [telegramController::class, 'sendMessage']);
+Route::get('/send-telegram-message', [telegramController::class, 'sendMessage']);
