@@ -65,8 +65,15 @@ class telegramController extends Controller
         if (isset($update['message'])) {
             $message = $update['message']['text'];
             $chatId = $update['message']['chat']['id'];
+            
+            // Mendapatkan status interaksi pengguna dari sesi
+            $status = session()->get('status_menu'.$chatId);
 
-            $this->sendMessageToChat($chatId, "You said: $message");
+            if($message == '/1'){
+                $this->sendMessageToChat($chatId, "You said 1: $message");
+            }else{
+                $this->sendMessageToChat($chatId, "You said: $message");
+            }
         }
 
         return response('OK', 200);
