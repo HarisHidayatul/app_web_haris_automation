@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Api;
 use Telegram\Bot\Laravel\Facades\Telegram;
 
@@ -66,14 +67,19 @@ class telegramController extends Controller
 
     public function webhook(Request $request)
     {
+        Log::info('Webhook called');
+
         $update = json_decode(file_get_contents('php://input'), true);
+        Log::info('Update received: ' . json_encode($update));
 
         if (isset($update['message'])) {
             $message = $update['message']['text'];
             $chatId = $update['message']['chat']['id'];
+            Log::info("Message: $message, Chat ID: $chatId");
 
             // Mendapatkan status interaksi pengguna dari sesi
             $status = session()->get('status_menu' . $chatId, '');
+            Log::info("Current status: $status");
 
             if ($message == '/1') {
                 $this->sendMessageToChat($chatId, "You said 1: $message $status");
@@ -81,6 +87,7 @@ class telegramController extends Controller
                 // Update status dengan menambahkan 'A'
                 $status .= 'A';
                 session()->put('status_menu' . $chatId, $status);
+                Log::info("Updated status: $status");
 
                 $this->sendMessageToChat($chatId, "You said: $message");
             }
