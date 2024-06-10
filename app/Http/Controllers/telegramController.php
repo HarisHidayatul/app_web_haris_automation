@@ -77,17 +77,10 @@ class telegramController extends Controller
             $chatId = $update['message']['chat']['id'];
             Log::info("Message: $message, Chat ID: $chatId");
 
-            // Mendapatkan status interaksi pengguna dari sesi
-            $status = session()->get('status_menu' . $chatId, '');
-            Log::info("Current status: $status");
-
             if ($message == '/1') {
-                $this->sendMessageToChat($chatId, "You said 1: $message $status");
+                $this->sendMessageToChat($chatId, "You said 1: $message $chatId");
             } else {
-                // Update status dengan menambahkan 'A'
-                $status .= 'A';
-                session()->put('status_menu' . $chatId, $status);
-                Log::info("Updated status: $status");
+                // session()->put('status_menu' . $chatId, $status);
 
                 $this->sendMessageToChat($chatId, "You said: $message");
             }
