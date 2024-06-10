@@ -78,15 +78,14 @@ class telegramController extends Controller
             $chatId = $update['message']['chat']['id'];
             Log::info("Message: $message, Chat ID: $chatId");
 
-            $telegram_user = telegram_user::where('telegram_chat_id','=',$chatId)->get();
+            $telegram_users = telegram_user::where('telegram_chat_id','=',$chatId)->first();
             // $telegram_users = telegram_user::all();
             // foreach($telegram_users as $telegram_user){
             //     $this->sendMessageToChat($chatId,"$telegram_user->telegram_chat_id");
             // }
             $this->sendMessageToChat($chatId, "$chatId");
-
             // $this->sendMessageToChat($chatId, "$telegram_user");
-            if($telegram_user == null){
+            if($telegram_users === null){
                 $this->sendMessageToChat($chatId, "Akun ini belum terdaftar pada database");
             }else{
                 $this->sendMessageToChat($chatId, "Akun ini terdaftar di database");
