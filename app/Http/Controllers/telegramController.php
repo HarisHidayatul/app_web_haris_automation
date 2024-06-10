@@ -84,7 +84,7 @@ class telegramController extends Controller
                 $this->sendMessageToChat($chatId, "id = $loop_telegram_user->id, telegram_chat_id = $loop_telegram_user->telegram_chat_id");
             }
 
-            $telegram_user = telegram_user::where('telegram_chat_id','=',$chatId)->first();
+            $telegram_user = telegram_user::all()->where('telegram_chat_id','=',$chatId)->first();
             // $telegram_users = telegram_user::all();
             // foreach($telegram_users as $telegram_user){
             //     $this->sendMessageToChat($chatId,"$telegram_user->telegram_chat_id");
