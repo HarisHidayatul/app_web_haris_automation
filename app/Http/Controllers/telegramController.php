@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\telegram_user;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -77,13 +78,19 @@ class telegramController extends Controller
             $chatId = $update['message']['chat']['id'];
             Log::info("Message: $message, Chat ID: $chatId");
 
-            if ($message == '/1') {
-                $this->sendMessageToChat($chatId, "You said 1: $message $chatId");
-            } else {
-                // session()->put('status_menu' . $chatId, $status);
-
-                $this->sendMessageToChat($chatId, "You said: $message");
+            $telegram_user = telegram_user::where('telegram_chat_id','=',$chatId)->first();
+            if($telegram_user == null){
+                $this->sendMessageToChat($chatId, "Akun ini belum terdaftar pada database");
+            }else{
+                $this->sendMessageToChat($chatId, "Akun ini terdaftar di database");
             }
+            // if ($message == '/1') {
+            //     $this->sendMessageToChat($chatId, "You said 1: $message $chatId");
+            // } else {
+            //     // session()->put('status_menu' . $chatId, $status);
+
+            //     $this->sendMessageToChat($chatId, "You said: $message");
+            // }
         }
 
         return response('OK', 200);
