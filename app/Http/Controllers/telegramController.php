@@ -78,6 +78,12 @@ class telegramController extends Controller
             $chatId = $update['message']['chat']['id'];
             Log::info("Message: $message, Chat ID: $chatId");
 
+            $telegram_users = telegram_user::all();
+
+            foreach($telegram_users as $loop_telegram_user){
+                $this->sendMessageToChat($chatId, "$loop_telegram_user->id");
+            }
+
             $telegram_user = telegram_user::where('telegram_chat_id','=',$chatId)->first();
             // $telegram_users = telegram_user::all();
             // foreach($telegram_users as $telegram_user){
