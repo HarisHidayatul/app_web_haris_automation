@@ -85,12 +85,7 @@ class telegramController extends Controller
             }
 
             $telegram_user = telegram_user::all()->where('telegram_chat_id','=',$chatId)->first();
-            // $telegram_users = telegram_user::all();
-            // foreach($telegram_users as $telegram_user){
-            //     $this->sendMessageToChat($chatId,"$telegram_user->telegram_chat_id");
-            // }
             $this->sendMessageToChat($chatId, "$chatId");
-            // $this->sendMessageToChat($chatId, "$telegram_user");
 
             // Tambahkan log untuk memeriksa hasil query
             Log::info("Query result: " . json_encode($telegram_user));
@@ -99,14 +94,14 @@ class telegramController extends Controller
                 $this->sendMessageToChat($chatId, "Akun ini belum terdaftar pada database");
             }else{
                 $this->sendMessageToChat($chatId, "Akun ini terdaftar di database");
+                if($telegram_user->menu_id == 1){
+                    // menu_id 1 untuk start
+                    $text_send = "Hai, ini dari Program Laravel Haris \n";
+                    $text_send .= "Klik menu dibawah untuk melanjutkan ke sistem";
+                    $text_send .= "\1 Akses Tabel Data Ke database";
+                    $this->sendMessageToChat($chatId, $text_send);
+                }
             }
-            // if ($message == '/1') {
-            //     $this->sendMessageToChat($chatId, "You said 1: $message $chatId");
-            // } else {
-            //     // session()->put('status_menu' . $chatId, $status);
-
-            //     $this->sendMessageToChat($chatId, "You said: $message");
-            // }
         }
 
         return response('OK', 200);
