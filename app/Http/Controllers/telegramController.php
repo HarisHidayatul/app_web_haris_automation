@@ -97,7 +97,7 @@ class telegramController extends Controller
                 if($telegram_user->menu_id == 1){
                     // menu_id 1 untuk start
                     $text_send = "Hai, ini dari Program Laravel Haris \n";
-                    $text_send .= "Klik menu dibawah untuk melanjutkan ke sistem";
+                    $text_send .= "Klik menu dibawah untuk melanjutkan ke sistem \n";
                     $text_send .= "/1 Akses Tabel Data Ke database";
                     $this->sendMessageToChat($chatId, $text_send);
                 }
