@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\akses_database;
 use App\Models\telegram_user;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
@@ -80,26 +81,43 @@ class telegramController extends Controller
 
             $telegram_users = telegram_user::all();
 
-            foreach($telegram_users as $loop_telegram_user){
-                $this->sendMessageToChat($chatId, "id = $loop_telegram_user->id, telegram_chat_id = $loop_telegram_user->telegram_chat_id");
-            }
+            // foreach($telegram_users as $loop_telegram_user){
+            //     $this->sendMessageToChat($chatId, "id = $loop_telegram_user->id, telegram_chat_id = $loop_telegram_user->telegram_chat_id");
+            // }
 
             $telegram_user = telegram_user::all()->where('telegram_chat_id','=',$chatId)->first();
             $this->sendMessageToChat($chatId, "$chatId");
 
             // Tambahkan log untuk memeriksa hasil query
-            Log::info("Query result: " . json_encode($telegram_user));
+            // Log::info("Query result: " . json_encode($telegram_user));
             
             if($telegram_user === null){
                 $this->sendMessageToChat($chatId, "Akun ini belum terdaftar pada database");
             }else{
-                $this->sendMessageToChat($chatId, "Akun ini terdaftar di database");
+                // $this->sendMessageToChat($chatId, "Akun ini terdaftar di database");
                 if($telegram_user->menu_id == 1){
-                    // menu_id 1 untuk start
-                    $text_send = "Hai, ini dari Program Laravel Haris \n";
-                    $text_send .= "Klik menu dibawah untuk melanjutkan ke sistem \n";
-                    $text_send .= "/1 Akses Tabel Data Ke database";
-                    $this->sendMessageToChat($chatId, $text_send);
+                    if($message == '/1'){
+                        $akses_databases = akses_database::all();
+                        // menu_id 1 untuk start
+                        $text_send = "Saat ini anda berada di menu akses tabel data ke database \n";
+                        $text_send .= "Klik tabel berikut yang anda ingin akses : \n";
+                        $text_send .= "/0 Kembali ke menu utama";
+                        foreach($akses_databases as $akses_database){
+                            if($akses_database->id == '/1'){
+                                continue;
+                            }
+                            $text_send .= "/$akses_database->id akses ke tabel $akses_database->nama_database";
+                        }
+                        $this->sendMessageToChat($chatId, $text_send);
+                        $telegram_user->menu_id = 2;
+                        $telegram_user->save();
+                    }else{
+                        // menu_id 1 untuk start
+                        $text_send = "Hai, ini dari Program Laravel Haris \n";
+                        $text_send .= "Klik menu dibawah untuk melanjutkan ke sistem : \n";
+                        $text_send .= "/1 Akses Tabel Data Ke database";
+                        $this->sendMessageToChat($chatId, $text_send);
+                    }
                 }
             }
         }
