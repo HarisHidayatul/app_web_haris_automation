@@ -82,13 +82,13 @@ class telegramController extends Controller
             Log::info("Message: $message, Chat ID: $chatId");
 
             $telegram_user = telegram_user::all()->where('telegram_chat_id', '=', $chatId)->first();
-            $this->sendMessageToChat($chatId, "$chatId");
+            // $this->sendMessageToChat($chatId, "$chatId");
 
             if ($telegram_user === null) {
                 $this->sendMessageToChat($chatId, "Akun ini belum terdaftar pada database");
             } else {
                 // $this->sendMessageToChat($chatId, "Akun ini terdaftar di database");
-                $this->sendMessageToChat($chatId, $this->response_telegram($telegram_user, $message));
+                $this->sendMessageValidUserToChat($chatId, $this->response_telegram($telegram_user, $message));
             }
         }
 
@@ -108,29 +108,34 @@ class telegramController extends Controller
             $text_send .= "/1 Akses Tabel Data Ke database";
             return $text_send;
         }
+        if($message == '/back'){
+            if($telegram_user->crud_id > 1){
+                $telegram_user->crud_id = $telegram_user->crud_id - 1;
+                $telegram_user->save();
+                return $this->response_telegram($telegram_user, '');
+            }
+            if($telegram_user->akses_database_id > 1){
+                $telegram_user->akses_database_id = $telegram_user->akses_database_id - 1;
+                $telegram_user->save();
+                return $this->response_telegram($telegram_user, '');
+            }
+            if($telegram_user->menu_id > 1){
+                $telegram_user->menu_id = $telegram_user->menu_id - 1;
+                $telegram_user->save();
+                return $this->response_telegram($telegram_user, '');
+            }
+            return $this->response_telegram($telegram_user, '');
+        }
         if ($telegram_user->menu_id == 1) {
             if ($message == '/1') {
-                $akses_databases = akses_database::all();
-                // menu_id 1 untuk start
-                $text_send = "Saat ini anda berada di menu akses tabel data ke database \n";
-                $text_send .= "Klik tabel berikut yang anda ingin akses : \n";
-                foreach ($akses_databases as $akses_database) {
-                    if ($akses_database->id == 1) {
-                        continue;
-                    }
-                    $text_send .= "/$akses_database->id akses ke tabel $akses_database->nama_database \n";
-                }
-                $text_send .= "/0 Kembali ke menu utama \n";
                 $telegram_user->menu_id = 2;
                 $telegram_user->save();
-                return $text_send;
-            } else {
-                // menu_id 1 untuk start
-                $text_send = "Hai, ini dari Program Laravel Haris \n";
-                $text_send .= "Klik menu dibawah untuk melanjutkan ke sistem : \n";
-                $text_send .= "/1 Akses Tabel Data Ke database";
-                return $text_send;
+                return $this->response_telegram($telegram_user, '');
             }
+            $text_send = "Anda memasuki menu utama \n";
+            $text_send .= "Klik menu dibawah untuk melanjutkan ke sistem : \n";
+            $text_send .= "/1 Akses Tabel Data Ke database";
+            return $text_send;
         }
         if ($telegram_user->menu_id == 2) {
             if ($telegram_user->akses_database_id == 1) {
@@ -141,27 +146,22 @@ class telegramController extends Controller
                     if (is_numeric($numberString)) {
                         // Mengonversi ke integer
                         $number = intval($numberString);
-                        $akses_database = akses_database::find($number);
-                        $crud = crud::all();
-                        $text_send = "Saat ini anda berada di menu akses tabel $akses_database->nama_database \n";
-                        $text_send .= "Klik menu berikut yang anda ingin akses : \n";
-                        foreach ($crud as $loop_crud) {
-                            if ($loop_crud->id == 1) {
-                                continue;
-                            }
-                            $text_send .= "/$loop_crud->id $loop_crud->tipe_crud data $akses_database->nama_database \n";
-                        }
-                        $text_send .= "/0 Kembali ke menu utama \n";
-                        $telegram_user->menu_id = 2;
                         $telegram_user->akses_database_id = $number;
                         $telegram_user->save();
-                        return $text_send;
-                    } else {
-                        return $this->textWrongChat();
+                        return $this->response_telegram($telegram_user,'');
                     }
-                } else {
-                    return $this->textWrongChat();
                 }
+                $akses_databases = akses_database::all();
+                // menu_id 1 untuk start
+                $text_send = "Saat ini anda berada di menu akses tabel data ke database \n";
+                $text_send .= "Klik tabel berikut yang anda ingin akses : \n";
+                foreach ($akses_databases as $akses_database) {
+                    if ($akses_database->id == 1) {
+                        continue;
+                    }
+                    $text_send .= "/$akses_database->id akses ke tabel $akses_database->nama_database \n";
+                }
+                return $text_send;
             }else{
                 if($telegram_user->crud_id == 1){
                     // akses database id 1 jika belum memilih apa apa di tabel
@@ -182,9 +182,18 @@ class telegramController extends Controller
                         } else {
                             return $this->textWrongChat();
                         }
-                    } else {
-                        return $this->textWrongChat();
                     }
+                    $akses_database = akses_database::find($telegram_user->akses_database_id);
+                    $crud = crud::all();
+                    $text_send = "Saat ini anda berada di menu akses tabel $akses_database->nama_database \n";
+                    $text_send .= "Klik menu berikut yang anda ingin akses : \n";
+                    foreach ($crud as $loop_crud) {
+                        if ($loop_crud->id == 1) {
+                            continue;
+                        }
+                        $text_send .= "/$loop_crud->id $loop_crud->tipe_crud data $akses_database->nama_database \n";
+                    }
+                    return $text_send;
                 }
             }
         }
@@ -195,8 +204,13 @@ class telegramController extends Controller
     {
         $text_send = "Input yang anda masukkan tidak tersedia di database \n";
         $text_send .= "Masukkan kembali input yang sesuai \n";
-        $text_send = "/0 Kembali ke menu utama \n";
         return $text_send;
+    }
+
+    private function sendMessageValidUserToChat($chatId, $text){
+        $text .= "\n/0 untuk kembali ke menu utama \n";
+        $text .= "/back untuk kembali";
+        $this->sendMessageToChat($chatId,$text);
     }
 
     private function sendMessageToChat($chatId, $text)
