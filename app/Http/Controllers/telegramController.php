@@ -109,18 +109,18 @@ class telegramController extends Controller
             $text_send .= "/1 Akses Tabel Data Ke database";
             return $text_send;
         }
-        if($message == '/back'){
-            if($telegram_user->crud_id > 1){
+        if ($message == '/back') {
+            if ($telegram_user->crud_id > 1) {
                 $telegram_user->crud_id = 1;
                 $telegram_user->save();
                 return $this->response_telegram($telegram_user, '');
             }
-            if($telegram_user->akses_database_id > 1){
+            if ($telegram_user->akses_database_id > 1) {
                 $telegram_user->akses_database_id = 1;
                 $telegram_user->save();
                 return $this->response_telegram($telegram_user, '');
             }
-            if($telegram_user->menu_id > 1){
+            if ($telegram_user->menu_id > 1) {
                 $telegram_user->menu_id = $telegram_user->menu_id - 1;
                 $telegram_user->save();
                 return $this->response_telegram($telegram_user, '');
@@ -149,7 +149,7 @@ class telegramController extends Controller
                         $number = intval($numberString);
                         $telegram_user->akses_database_id = $number;
                         $telegram_user->save();
-                        return $this->response_telegram($telegram_user,'');
+                        return $this->response_telegram($telegram_user, '');
                     }
                 }
                 $akses_databases = akses_database::all();
@@ -163,8 +163,8 @@ class telegramController extends Controller
                     $text_send .= "/$akses_database->id akses ke tabel $akses_database->nama_database \n";
                 }
                 return $text_send;
-            }else{
-                if($telegram_user->crud_id == 1){
+            } else {
+                if ($telegram_user->crud_id == 1) {
                     // akses database id 1 jika belum memilih apa apa di tabel
                     if (substr($message, 0, 1) === '/') {
                         // Menghapus karakter "/" dan memeriksa apakah sisanya adalah angka
@@ -174,7 +174,7 @@ class telegramController extends Controller
                             $number = intval($numberString);
                             $telegram_user->crud_id = $number;
                             $telegram_user->save();
-                            return $this->response_telegram($telegram_user,'');
+                            return $this->response_telegram($telegram_user, '');
                         } else {
                             return $this->textWrongChat();
                         }
@@ -195,7 +195,7 @@ class telegramController extends Controller
                 $akses_database = akses_database::find($telegram_user->akses_database_id);
 
                 $text_send = "Saat ini anda memasuki fitur $crud->tipe_crud untuk tabel $akses_database->nama_database \n";
-                if($telegram_user->crud_id == 2){
+                if ($telegram_user->crud_id == 2) {
                     // 2 untuk show tabel
                     $nama_tabel = akses_database::find($telegram_user->akses_database_id);
                     return $this->showTable($nama_tabel->nama_database);
@@ -209,16 +209,39 @@ class telegramController extends Controller
     {
         // Periksa apakah tabel ada di database
         if (!DB::getSchemaBuilder()->hasTable($table)) {
-            return response()->json(['error' => 'Table not found'], 404);
+            return response('Table not found', 404)
+                ->header('Content-Type', 'text/plain');
         }
 
         // Mengambil semua baris dari tabel
         $rows = DB::table($table)->get();
 
-        // Mengembalikan hasil query sebagai JSON
-        return response()->json($rows);
+        // Konversi hasil ke array
+        $rowsArray = $rows->toArray();
+
+        // Inisialisasi string untuk tabel
+        $tableString = '';
+
+        // Tambahkan header tabel
+        if (count($rowsArray) > 0) {
+            $columns = array_keys((array) $rowsArray[0]);
+            $tableString .= implode("\t", $columns) . "\n";
+        }
+
+        // Tambahkan baris tabel
+        foreach ($rowsArray as $row) {
+            $rowArray = (array) $row;
+            $tableString .= implode("\t", $rowArray) . "\n";
+        }
+
+        // Mengembalikan string tabel sebagai teks biasa tanpa header tambahan
+        return response($tableString, 200)
+            ->header('Content-Type', 'text/plain')
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
     }
-    
+
     private function textWrongChat()
     {
         $text_send = "Input yang anda masukkan tidak tersedia di database \n";
@@ -226,10 +249,11 @@ class telegramController extends Controller
         return $text_send;
     }
 
-    private function sendMessageValidUserToChat($chatId, $text){
+    private function sendMessageValidUserToChat($chatId, $text)
+    {
         $text .= "\n/0 untuk kembali ke menu utama \n";
         $text .= "/back untuk kembali";
-        $this->sendMessageToChat($chatId,$text);
+        $this->sendMessageToChat($chatId, $text);
     }
 
     private function sendMessageToChat($chatId, $text)
