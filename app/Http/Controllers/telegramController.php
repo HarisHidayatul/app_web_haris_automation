@@ -7,6 +7,7 @@ use App\Models\crud;
 use App\Models\telegram_user;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use PhpParser\Node\Stmt\ElseIf_;
 use Telegram\Bot\Api;
@@ -110,12 +111,12 @@ class telegramController extends Controller
         }
         if($message == '/back'){
             if($telegram_user->crud_id > 1){
-                $telegram_user->crud_id = $telegram_user->crud_id - 1;
+                $telegram_user->crud_id = 1;
                 $telegram_user->save();
                 return $this->response_telegram($telegram_user, '');
             }
             if($telegram_user->akses_database_id > 1){
-                $telegram_user->akses_database_id = $telegram_user->akses_database_id - 1;
+                $telegram_user->akses_database_id = 1;
                 $telegram_user->save();
                 return $this->response_telegram($telegram_user, '');
             }
@@ -171,14 +172,9 @@ class telegramController extends Controller
                         if (is_numeric($numberString)) {
                             // Mengonversi ke integer
                             $number = intval($numberString);
-                            $crud = crud::find($number);
-                            $akses_database = akses_database::find($telegram_user->akses_database_id);
-
-                            $text_send = "Saat ini anda memasuki fitur $crud->tipe_crud untuk tabel $akses_database->nama_database \n";
-                            
                             $telegram_user->crud_id = $number;
                             $telegram_user->save();
-                            return $text_send;
+                            return $this->response_telegram($telegram_user,'');
                         } else {
                             return $this->textWrongChat();
                         }
@@ -195,9 +191,32 @@ class telegramController extends Controller
                     }
                     return $text_send;
                 }
+                $crud = crud::find($telegram_user->crud_id);
+                $akses_database = akses_database::find($telegram_user->akses_database_id);
+
+                $text_send = "Saat ini anda memasuki fitur $crud->tipe_crud untuk tabel $akses_database->nama_database \n";
+                if($telegram_user->crud_id == 2){
+                    // 2 untuk show tabel
+                    $nama_tabel = akses_database::find($telegram_user->akses_database_id);
+                    return $this->showTable($nama_tabel->nama_database);
+                }
             }
         }
         return "Pilihan Menu Yang Anda Masukkan Tidak Tersedia Di Database \n /0 untuk kembali ke menu utama";
+    }
+
+    public function showTable($table)
+    {
+        // Periksa apakah tabel ada di database
+        if (!DB::getSchemaBuilder()->hasTable($table)) {
+            return response()->json(['error' => 'Table not found'], 404);
+        }
+
+        // Mengambil semua baris dari tabel
+        $rows = DB::table($table)->get();
+
+        // Mengembalikan hasil query sebagai JSON
+        return response()->json($rows);
     }
     
     private function textWrongChat()
