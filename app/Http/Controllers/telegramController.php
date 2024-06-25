@@ -245,14 +245,18 @@ class telegramController extends Controller
                         $model = 'App\\Models\\' . strtolower(Str::studly(Str::singular($nama_tabel->nama_database))); // Buat nama model dinamis berdasarkan nama tabel
                         if (class_exists($model)) {
                             $model::create($data_kirim);
+                            $text_send .= "Data berhasil dimasukkan ke tabel\n";
                         } else {
                             return "Ada kesalahan sistem, dimana model tidak ditemukan $model";
                         }
+                        $telegram_user->status_tele_id = 1;
+                        $telegram_user->save();
+                        return $text_send;
                     }
                 }
             }
         }
-        return "Pilihan Menu Yang Anda Masukkan Tidak Tersedia Di Database \n /0 untuk kembali ke menu utama";
+        return "Pilihan Menu Yang Anda Masukkan Tidak Tersedia Di Database";
     }
 
     public function showTable($table)
