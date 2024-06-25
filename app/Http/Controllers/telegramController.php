@@ -242,7 +242,7 @@ class telegramController extends Controller
                         $data_kirim = array_combine($filteredColumns, $inputValues);
 
                         // Insert data ke tabel sesuai dengan model yang sesuai (contoh: User)
-                        $model = 'App\\Models\\' . Str::studly(Str::singular($nama_tabel)); // Buat nama model dinamis berdasarkan nama tabel
+                        $model = 'App\\Models\\' . Str::studly(Str::singular($nama_tabel->nama_database)); // Buat nama model dinamis berdasarkan nama tabel
                         if (class_exists($model)) {
                             $model::create($data_kirim);
                         } else {
