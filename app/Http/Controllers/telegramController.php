@@ -205,10 +205,10 @@ class telegramController extends Controller
                     if($telegram_user->status_tele_id == 1){
                         $columns = Schema::getColumnListing($nama_tabel->nama_database);
 
-                        $text_send .= 'Untuk masukkan data ke tabel, ketik format seperti berikut : \n';
+                        $text_send .= "Untuk masukkan data ke tabel, ketik format seperti berikut : \n";
                         // Menggabungkan nama kolom menjadi satu string dipisahkan oleh koma
-                        $text_send .= implode(', ', $columns);
-                        $text_send .= '\n';
+                        $text_send .= implode(", ", $columns);
+                        $text_send .= "\n";
                         return $text_send;
                     }
                 }
