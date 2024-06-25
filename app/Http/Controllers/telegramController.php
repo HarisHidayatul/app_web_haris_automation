@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Schema;
 use PhpParser\Node\Stmt\ElseIf_;
 use Telegram\Bot\Api;
 use Telegram\Bot\Laravel\Facades\Telegram;
+use Illuminate\Support\Str;
 
 class telegramController extends Controller
 {
@@ -113,6 +114,7 @@ class telegramController extends Controller
         if ($message == '/back') {
             if ($telegram_user->crud_id > 1) {
                 $telegram_user->crud_id = 1;
+                $telegram_user->status_tele_id = 1;
                 $telegram_user->save();
                 return $this->response_telegram($telegram_user, '');
             }
@@ -201,19 +203,51 @@ class telegramController extends Controller
                     $text_send .= $this->showTable($nama_tabel->nama_database);
                     return $text_send;
                 }
-                if($telegram_user->crud_id == 3){
-                    if($telegram_user->status_tele_id == 1){
+                if ($telegram_user->crud_id == 3) {
+                    if ($telegram_user->status_tele_id == 1) {
                         $columns = Schema::getColumnListing($nama_tabel->nama_database);
-                        
-                        $filteredColumns = array_filter($columns, function($column) {
+
+                        $filteredColumns = array_filter($columns, function ($column) {
                             return $column !== 'id';
                         });
 
-                        $text_send .= "Untuk masukkan data ke tabel, ketik format seperti berikut : \n";
+                        $text_send .= "Untuk masukkan data ke tabel, ketik format seperti berikut : \n \n";
                         // Menggabungkan nama kolom menjadi satu string dipisahkan oleh koma
                         $text_send .= implode(", ", $filteredColumns);
                         $text_send .= "\n";
+
+                        $telegram_user->status_tele_id = 2;
+                        $telegram_user->save();
+
                         return $text_send;
+                    }
+                    if ($telegram_user->status_tele_id == 2) {
+                        $columns = Schema::getColumnListing($nama_tabel->nama_database);
+
+                        // Memfilter kolom 'id' dari daftar kolom
+                        $filteredColumns = array_filter($columns, function ($column) {
+                            return $column !== 'id';
+                        });
+
+                        // Pisahkan string menjadi array
+                        $inputValues = explode(',', $message);
+
+                        // Pastikan jumlah nilai yang diberikan sesuai dengan jumlah kolom yang difilter
+                        if (count($inputValues) !== count($filteredColumns)) {
+                            $text_send .= "Data yang anda masukkan tidak sesuai, silahkan isi kembali dengan format yang diberikan";
+                            return $text_send;
+                        }
+
+                        // Kombinasikan kolom yang difilter dengan nilai input
+                        $data_kirim = array_combine($filteredColumns, $inputValues);
+
+                        // Insert data ke tabel sesuai dengan model yang sesuai (contoh: User)
+                        $model = 'App\\Models\\' . Str::studly(Str::singular($nama_tabel)); // Buat nama model dinamis berdasarkan nama tabel
+                        if (class_exists($model)) {
+                            $model::create($data_kirim);
+                        } else {
+                            return "Ada kesalahan sistem, dimana model tidak ditemukan";
+                        }
                     }
                 }
             }
