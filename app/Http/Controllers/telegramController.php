@@ -204,10 +204,14 @@ class telegramController extends Controller
                 if($telegram_user->crud_id == 3){
                     if($telegram_user->status_tele_id == 1){
                         $columns = Schema::getColumnListing($nama_tabel->nama_database);
+                        
+                        $filteredColumns = array_filter($columns, function($column) {
+                            return $column !== 'id';
+                        });
 
                         $text_send .= "Untuk masukkan data ke tabel, ketik format seperti berikut : \n";
                         // Menggabungkan nama kolom menjadi satu string dipisahkan oleh koma
-                        $text_send .= implode(", ", $columns);
+                        $text_send .= implode(", ", $filteredColumns);
                         $text_send .= "\n";
                         return $text_send;
                     }
