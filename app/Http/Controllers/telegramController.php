@@ -9,6 +9,7 @@ use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use PhpParser\Node\Stmt\ElseIf_;
 use Telegram\Bot\Api;
 use Telegram\Bot\Laravel\Facades\Telegram;
@@ -192,13 +193,24 @@ class telegramController extends Controller
                     return $text_send;
                 }
                 $crud = crud::find($telegram_user->crud_id);
-                $akses_database = akses_database::find($telegram_user->akses_database_id);
 
-                $text_send = "Saat ini anda memasuki fitur $crud->tipe_crud untuk tabel $akses_database->nama_database \n";
+                $nama_tabel = akses_database::find($telegram_user->akses_database_id);
+                $text_send = "Saat ini anda memasuki fitur $crud->tipe_crud untuk tabel $nama_tabel->nama_database \n";
                 if ($telegram_user->crud_id == 2) {
                     // 2 untuk show tabel
-                    $nama_tabel = akses_database::find($telegram_user->akses_database_id);
-                    return $this->showTable($nama_tabel->nama_database);
+                    $text_send .= $this->showTable($nama_tabel->nama_database);
+                    return $text_send;
+                }
+                if($telegram_user->crud_id == 3){
+                    if($telegram_user->status_tele_id == 1){
+                        $columns = Schema::getColumnListing($nama_tabel->nama_database);
+
+                        $text_send .= 'Untuk masukkan data ke tabel, ketik format seperti berikut : \n';
+                        // Menggabungkan nama kolom menjadi satu string dipisahkan oleh koma
+                        $text_send .= implode(', ', $columns);
+                        $text_send .= '\n';
+                        return $text_send;
+                    }
                 }
             }
         }

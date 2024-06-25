@@ -5,19 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class telegram_user extends Model
+class status_tele extends Model
 {
     use HasFactory;
-    public $table = 'telegram_user';
+    public $table = 'status_tele';
     public $guarded = ['id'];
     protected $primaryKey = 'id';
     public $timestamps = false;
     
     protected $fillable = [
-        'telegram_chat_id',
-        'menu_id',
-        'akses_database_id',
-        'crud_id',
-        'status_tele_id'
+        'status'
     ];
 }
