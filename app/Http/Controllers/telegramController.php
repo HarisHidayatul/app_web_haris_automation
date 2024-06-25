@@ -246,7 +246,7 @@ class telegramController extends Controller
                         if (class_exists($model)) {
                             $model::create($data_kirim);
                         } else {
-                            return "Ada kesalahan sistem, dimana model tidak ditemukan";
+                            return "Ada kesalahan sistem, dimana model tidak ditemukan $model";
                         }
                     }
                 }
