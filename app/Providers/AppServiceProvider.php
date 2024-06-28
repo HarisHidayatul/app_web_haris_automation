@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Services\telegramBot;
+use App\Http\Controllers\telegramBot;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider

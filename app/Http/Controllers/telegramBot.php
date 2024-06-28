@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Http\Controllers;
 
 use Telegram\Bot\Api;
 use App\Models\telegram_user;
