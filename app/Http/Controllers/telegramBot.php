@@ -252,6 +252,10 @@ class telegramBot
 
     private function sendMessageToChat($chatId, $text)
     {
+        $text .= "\n";
+        $text .= "/0 untuk ke menu utama";
+        $text .= "\n";
+        $text .= "/back untuk kembali";
         $this->telegram->sendMessage([
             'chat_id' => $chatId,
             'text' => $text,
